@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniVault · Study Bank</title>
+  <!-- Tailwind + FontAwesome + Google Font (Inter) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    /* custom scroll & subtle transitions */
+    .sidebar-scroll { max-height: calc(100vh - 200px); overflow-y: auto; }
+    .modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px -8px rgba(0,0,0,0.10); }
+    .drag-drop-zone { border: 2px dashed #cbd5e1; transition: 0.15s; }
+    .drag-drop-zone.dragover { border-color: #4f46e5; background: #eef2ff; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+  <!-- ========== STICKY NAV ========== -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3">
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <span class="text-indigo-600 text-2xl"><i class="fas fa-graduation-cap"></i></span>
+          <span class="font-bold text-xl tracking-tight text-slate-800">Uni<span class="text-indigo-600">Vault</span></span>
+        </div>
+
+        <!-- Search + Course dropdown (hidden on small) -->
+        <div class="hidden md:flex items-center flex-1 max-w-md mx-4 bg-slate-100 rounded-full px-4 py-1.5 border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-300 focus-within:border-indigo-400">
+          <i class="fas fa-search text-slate-400 mr-2 text-sm"></i>
+          <input type="text" placeholder="Search courses, papers..." class="bg-transparent w-full outline-none text-sm placeholder-slate-400">
+          <div class="border-l border-slate-300 pl-2 ml-1 flex items-center gap-1">
+            <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+            <select class="bg-transparent outline-none text-sm text-slate-600 cursor-pointer">
+              <option>All</option><option>CS</option><option>EE</option><option>ME</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Right actions: avatar + upload CTA -->
+        <div class="flex items-center gap-3">
+          <button class="hidden sm:inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-full shadow-sm transition">
+            <i class="fas fa-plus-circle"></i> Upload Resource
+          </button>
+          <button class="sm:hidden w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition flex items-center justify-center">
+            <i class="fas fa-plus"></i>
+          </button>
+          <div class="w-9 h-9 rounded-full bg-slate-200 border-2 border-slate-300 overflow-hidden flex items-center justify-center text-slate-600">
+            <i class="fas fa-user-circle text-2xl"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== MAIN 3-COLUMN LAYOUT ========== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT SIDEBAR · filters -->
+      <aside class="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sidebar-scroll h-fit sticky top-24">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-4">
+          <i class="fas fa-sliders-h"></i> Filters
+        </h2>
+
+        <!-- Department -->
+        <div class="mb-5">
+          <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Department</h3>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Computer Science</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Electrical Eng.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Mechanical Eng.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Mathematics</label>
+          </div>
+        </div>
+
+        <!-- Year Level -->
+        <div class="mb-5">
+          <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Year Level</h3>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> 1st Year</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> 2nd Year</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> 3rd Year</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> 4th Year+</label>
+          </div>
+        </div>
+
+        <!-- Semester -->
+        <div class="mb-5">
+          <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Semester</h3>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> semister1</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Semister2</label>
+          </div>
+        </div>
+
+        <!-- Resource Type -->
+        <div>
+          <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Resource Type</h3>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600" checked> Past Papers</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Lecture Notes</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Tutorials</label>
+            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-indigo-600"> Assignments</label>
+          </div>
+        </div>
+
+        <button class="mt-6 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2 rounded-xl transition">Apply filters</button>
+      </aside>
+
+      <!-- MAIN CONTENT · resource grid -->
+      <section class="lg:col-span-6 space-y-4">
+        <!-- top bar: sort + results -->
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-sm text-slate-500"><span class="font-semibold text-slate-700">12</span> resources</span>
+          <div class="flex items-center gap-3 text-sm">
+            <span class="text-slate-500">Sort by:</span>
+            <select class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+              <option>Most Recent</option>
+              <option>Most Upvoted</option>
+              <option>Most Downloaded</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grid cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- CARD 1 -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm card-hover p-4 flex flex-col">
+            <div class="flex items-start justify-between">
+              <span class="bg-indigo-100 text-indigo-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">CS201</span>
+              <span class="text-xs text-slate-400"><i class="far fa-calendar-alt mr-1"></i> 2024</span>
+            </div>
+            <h3 class="font-semibold text-base mt-1.5 leading-snug">Data Structures Midterm 2024</h3>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><i class="fas fa-user-graduate text-slate-400"></i> Dr. Adams · <i class="far fa-file-pdf text-red-400"></i> 2.4 MB</p>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="flex items-center gap-1 text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-800"><i class="fas fa-arrow-up"></i></button>
+                <span class="text-slate-700">24</span>
+                <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-arrow-down"></i></button>
+              </div>
+              <span class="text-xs text-slate-400"><i class="far fa-eye"></i> 143</span>
+              <span class="text-xs text-slate-400"><i class="fas fa-download"></i> 32</span>
+            </div>
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+              <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full transition" onclick="openPDFModal()"><i class="fas fa-eye mr-1"></i>Preview</button>
+              <button class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1 rounded-full transition"><i class="fas fa-download mr-1"></i>Download</button>
+            </div>
+          </div>
+
+          <!-- CARD 2 -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm card-hover p-4 flex flex-col">
+            <div class="flex items-start justify-between">
+              <span class="bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">EE310</span>
+              <span class="text-xs text-slate-400"><i class="far fa-calendar-alt mr-1"></i> 2023</span>
+            </div>
+            <h3 class="font-semibold text-base mt-1.5 leading-snug">Signals & Systems Final</h3>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><i class="fas fa-user-graduate text-slate-400"></i> Prof. Li · <i class="far fa-file-pdf text-red-400"></i> 3.1 MB</p>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="flex items-center gap-1 text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-800"><i class="fas fa-arrow-up"></i></button>
+                <span class="text-slate-700">18</span>
+                <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-arrow-down"></i></button>
+              </div>
+              <span class="text-xs text-slate-400"><i class="far fa-eye"></i> 97</span>
+              <span class="text-xs text-slate-400"><i class="fas fa-download"></i> 21</span>
+            </div>
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+              <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full transition" onclick="openPDFModal()"><i class="fas fa-eye mr-1"></i>Preview</button>
+              <button class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1 rounded-full transition"><i class="fas fa-download mr-1"></i>Download</button>
+            </div>
+          </div>
+
+          <!-- CARD 3 -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm card-hover p-4 flex flex-col">
+            <div class="flex items-start justify-between">
+              <span class="bg-amber-100 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">MATH201</span>
+              <span class="text-xs text-slate-400"><i class="far fa-calendar-alt mr-1"></i> 2024</span>
+            </div>
+            <h3 class="font-semibold text-base mt-1.5 leading-snug">Calculus III Tutorial Solutions</h3>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><i class="fas fa-user-graduate text-slate-400"></i> TA Chen · <i class="far fa-file-pdf text-red-400"></i> 1.8 MB</p>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="flex items-center gap-1 text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-800"><i class="fas fa-arrow-up"></i></button>
+                <span class="text-slate-700">9</span>
+                <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-arrow-down"></i></button>
+              </div>
+              <span class="text-xs text-slate-400"><i class="far fa-eye"></i> 56</span>
+              <span class="text-xs text-slate-400"><i class="fas fa-download"></i> 12</span>
+            </div>
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+              <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full transition" onclick="openPDFModal()"><i class="fas fa-eye mr-1"></i>Preview</button>
+              <button class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1 rounded-full transition"><i class="fas fa-download mr-1"></i>Download</button>
+            </div>
+          </div>
+
+          <!-- CARD 4 -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm card-hover p-4 flex flex-col">
+            <div class="flex items-start justify-between">
+              <span class="bg-rose-100 text-rose-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">CS350</span>
+              <span class="text-xs text-slate-400"><i class="far fa-calendar-alt mr-1"></i> 2023</span>
+            </div>
+            <h3 class="font-semibold text-base mt-1.5 leading-snug">Operating Systems Midterm</h3>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><i class="fas fa-user-graduate text-slate-400"></i> Dr. Park · <i class="far fa-file-pdf text-red-400"></i> 2.9 MB</p>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="flex items-center gap-1 text-sm font-medium">
+                <button class="text-indigo-600 hover:text-indigo-800"><i class="fas fa-arrow-up"></i></button>
+                <span class="text-slate-700">31</span>
+                <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-arrow-down"></i></button>
+              </div>
+              <span class="text-xs text-slate-400"><i class="far fa-eye"></i> 210</span>
+              <span class="text-xs text-slate-400"><i class="fas fa-download"></i> 48</span>
+            </div>
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+              <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full transition" onclick="openPDFModal()"><i class="fas fa-eye mr-1"></i>Preview</button>
+              <button class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1 rounded-full transition"><i class="fas fa-download mr-1"></i>Download</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="lg:col-span-3 space-y-5">
+        <!-- Top Contributors -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-4">
+            <i class="fas fa-trophy text-amber-500"></i> Top Contributors
+          </h2>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2"><span class="font-medium text-slate-700">1.</span> <span>Alice K.</span> <span class="text-xs text-slate-400">CS</span></div>
+              <span class="font-semibold text-indigo-600">1,240</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2"><span class="font-medium text-slate-700">2.</span> <span>James R.</span> <span class="text-xs text-slate-400">EE</span></div>
+              <span class="font-semibold text-indigo-600">980</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2"><span class="font-medium text-slate-700">3.</span> <span>Sophia M.</span> <span class="text-xs text-slate-400">MATH</span></div>
+              <span class="font-semibold text-indigo-600">855</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2"><span class="font-medium text-slate-700">4.</span> <span>Liam W.</span> <span class="text-xs text-slate-400">ME</span></div>
+              <span class="font-semibold text-indigo-600">720</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2"><span class="font-medium text-slate-700">5.</span> <span>Emma T.</span> <span class="text-xs text-slate-400">CS</span></div>
+              <span class="font-semibold text-indigo-600">610</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recently Added -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-4">
+            <i class="fas fa-clock text-slate-400"></i> Recently Added
+          </h2>
+          <ul class="space-y-2.5 text-sm">
+            <li class="flex items-start gap-2"><span class="text-indigo-600 text-xs mt-0.5">•</span> <span><span class="font-medium">CS201</span> — Midterm 2024 <span class="text-slate-400 text-xs">2h ago</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-indigo-600 text-xs mt-0.5">•</span> <span><span class="font-medium">PHY101</span> — Mechanics Notes <span class="text-slate-400 text-xs">5h ago</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-indigo-600 text-xs mt-0.5">•</span> <span><span class="font-medium">EE310</span> — Signals Final <span class="text-slate-400 text-xs">1d ago</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-indigo-600 text-xs mt-0.5">•</span> <span><span class="font-medium">MATH201</span> — Calc III Solutions <span class="text-slate-400 text-xs">2d ago</span></span></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="pdfModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="modal-backdrop absolute inset-0" onclick="closePDFModal()"></div>
+    <div class="relative bg-white w-full max-w-3xl mx-4 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="font-semibold text-slate-800"><i class="fas fa-file-pdf text-red-500 mr-2"></i>Preview · Data Structures Midterm</h3>
+        <button onclick="closePDFModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 transition flex items-center justify-center text-slate-500"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="flex-1 p-4 bg-slate-50 flex items-center justify-center min-h-[300px]">
+        <div class="bg-white w-full h-[400px] rounded-lg shadow-inner border border-slate-200 flex flex-col items-center justify-center text-slate-400">
+          <i class="fas fa-file-pdf text-6xl text-red-300 mb-3"></i>
+          <p class="text-sm">PDF preview simulation · <span class="text-slate-600 font-medium">CS201_Midterm_2024.pdf</span></p>
+          <p class="text-xs text-slate-400 mt-1">(Embedded viewer would render actual PDF)</p>
+          <button class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2 rounded-full shadow transition"><i class="fas fa-download mr-2"></i>Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="uploadModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="modal-backdrop absolute inset-0" onclick="closeUploadModal()"></div>
+    <div class="relative bg-white w-full max-w-lg mx-4 rounded-2xl shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800 text-lg"><i class="fas fa-cloud-upload-alt text-indigo-500 mr-2"></i>Upload Resource</h3>
+        <button onclick="closeUploadModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 transition flex items-center justify-center text-slate-500"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="dropZone" class="drag-drop-zone rounded-xl p-8 text-center cursor-pointer transition bg-slate-50/80 hover:bg-slate-100">
+        <i class="fas fa-file-pdf text-4xl text-slate-300 mb-2"></i>
+        <p class="font-medium text-slate-700">Drag & drop your file here</p>
+        <p class="text-xs text-slate-400 mt-1">PDF, DOCX up to 25MB</p>
+        <div class="mt-3 inline-block bg-indigo-50 text-indigo-700 text-sm px-4 py-1.5 rounded-full border border-indigo-200">Browse files</div>
+        <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx">
+      </div>
+      <!-- Form fields -->
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-medium text-slate-500">Title</label><input type="text" placeholder="e.g. Midterm 2024" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"></div>
+        <div><label class="text-xs font-medium text-slate-500">Course</label><select class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"><option>CS201</option><option>EE310</option><option>MATH201</option></select></div>
+        <div><label class="text-xs font-medium text-slate-500">Category</label><select class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"><option>Past Paper</option><option>Lecture Notes</option><option>Tutorial</option></select></div>
+        <div><label class="text-xs font-medium text-slate-500">Academic Year</label><select class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"><option>2024/2025</option><option>2023/2024</option></select></div>
+      </div>
+      <button class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Upload Resource</button>
+    </div>
+  </div>
+
+  <script>
+    // PDF Modal
+    function openPDFModal() {
+      const modal = document.getElementById('pdfModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+    function closePDFModal() {
+      const modal = document.getElementById('pdfModal');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // Upload Modal
+    function openUploadModal() {
+      const modal = document.getElementById('uploadModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+    function closeUploadModal() {
+      const modal = document.getElementById('uploadModal');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // demo: trigger upload modal from CTA
+    document.querySelector('button:has(.fa-plus-circle)')?.addEventListener('click', openUploadModal);
+    // also mobile plus button
+    document.querySelector('.sm\\:hidden')?.addEventListener('click', openUploadModal);
+
+    // drag-and-drop visuals
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length) alert(`File selected: ${files[0].name}`);
+    });
+    fileInput.addEventListener('change', function() {
+      if (this.files.length) alert(`File selected: ${this.files[0].name}`);
+    });
+
+    // close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closePDFModal(); closeUploadModal(); }
+    });
+  </script>
+</body>
+</html>
